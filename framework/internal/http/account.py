@@ -11,3 +11,9 @@ class AccountApi:
         response = self._client.post("/register/user/async-register", json=data)
         print(response.content)
         return response
+
+    def user_activate(self, token: str):
+        params = {"token":token}
+        response = self._client.put("/register/user/activate", params=params)
+        print(response.content)
+        return response
