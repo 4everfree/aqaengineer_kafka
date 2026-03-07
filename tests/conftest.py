@@ -1,7 +1,10 @@
+from typing import Generator, Any
+
 import pytest
 
 from framework.internal.http.account import AccountApi
 from framework.internal.http.mail import MailApi
+from framework.internal.kafka.consumer import Consumer
 from framework.internal.kafka.producer import Producer
 
 
@@ -14,6 +17,11 @@ def mail() -> MailApi:
     return MailApi()
 
 @pytest.fixture(scope="session")
-def kafka_producer() -> Producer:
+def kafka_producer() -> Generator[Producer, Any, None]:
     with Producer() as producer:
         yield producer
+
+@pytest.fixture(scope="session")
+def kafka_consumer() -> Generator[Consumer | Any, Any, None]:
+    with Consumer() as consumer:
+        yield consumer
