@@ -3,6 +3,7 @@ from typing import Generator, Any
 import pytest
 
 from framework.helpers.kafka.consumers.register_events import RegisterEventsSubscriber
+from framework.helpers.kafka.consumers.register_events_error import RegisterEventsErrorSubscriber
 from framework.internal.http.account import AccountApi
 from framework.internal.http.mail import MailApi
 from framework.internal.kafka.consumer import Consumer
@@ -25,6 +26,10 @@ def kafka_producer() -> Generator[Producer, Any, None]:
 @pytest.fixture(scope="session")
 def register_events_subscriber() -> RegisterEventsSubscriber:
     return RegisterEventsSubscriber()
+
+@pytest.fixture(scope="session")
+def register_events_error_subscriber() -> RegisterEventsSubscriber:
+    return RegisterEventsErrorSubscriber()
 
 @pytest.fixture(scope="session", autouse=True)
 def kafka_consumer(
