@@ -5,7 +5,7 @@ class RegisterEventsErrorSubscriber(Subscriber):
 
     @property
     def topic(self) -> str:
-        return "register-events-error"
+        return "register-events-errors"
 
     def handle_message(self, record):
         super().handle_message(record)

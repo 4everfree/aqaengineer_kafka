@@ -17,7 +17,7 @@ class Subscriber(ABC):
     def get_message(self, timeout: int = 90):
         try:
             return self._messages.get(timeout=timeout)
-        except queue.Queue:
+        except Exception as e:
             raise AssertionError(
                 f"No messages from topic: {self.topic} within timeout: {timeout}"
             )

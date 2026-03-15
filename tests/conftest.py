@@ -28,13 +28,14 @@ def register_events_subscriber() -> RegisterEventsSubscriber:
     return RegisterEventsSubscriber()
 
 @pytest.fixture(scope="session")
-def register_events_error_subscriber() -> RegisterEventsSubscriber:
+def register_events_error_subscriber() -> RegisterEventsErrorSubscriber:
     return RegisterEventsErrorSubscriber()
 
 @pytest.fixture(scope="session", autouse=True)
 def kafka_consumer(
-        register_events_subscriber: RegisterEventsSubscriber
+        register_events_subscriber: RegisterEventsSubscriber,
+        register_events_error_subscriber: RegisterEventsErrorSubscriber,
 ) -> Generator[Consumer | Any, Any, None]:
-    with Consumer(subscribers=[register_events_subscriber]) as consumer:
+    with Consumer(subscribers=[register_events_subscriber, register_events_error_subscriber]) as consumer:
         yield consumer
 
