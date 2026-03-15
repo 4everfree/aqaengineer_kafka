@@ -39,3 +39,45 @@ def kafka_consumer(
     with Consumer(subscribers=[register_events_subscriber, register_events_error_subscriber]) as consumer:
         yield consumer
 
+@pytest.fixture
+def register_message() -> dict[str, str]:
+    base = uuid.uuid4().hex
+    return {
+        "login": base,
+        "email": f"{base}@mail.ru",
+        "password": "1jksdnfjsadnfsa23"
+    }
+
+
+@pytest.fixture
+def register_message_wrong() -> dict[str, str]:
+    base = "!#_+"
+    return {
+        "login": base,
+        "email": f"{base}@mail",
+        "password": "1jksdnfjsadnfsa23"
+    }
+
+
+@pytest.fixture
+def register_message_unknown() -> dict[str, dict[str, str]]:
+    return {
+        "input_data": {
+            "login": "string",
+            "email": "string@mail.ru",
+            "password": "string"
+        },
+        "error_message": {
+            "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+            "title": "Validation failed",
+            "status": 400,
+            "traceId": "00-d957971fc5a90855accb02b59e879f3c-fa1d384d99ca048d-01",
+            "errors": {
+                "Email": [
+                    "Taken"
+                ]
+            }
+        },
+        "error_type": "unknown"
+    }
+

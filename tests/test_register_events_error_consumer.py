@@ -46,3 +46,54 @@ def test_register_events_error_consumer(account: AccountApi, mail: MailApi, kafk
     response_json = response.json()
     assert response_json["resource"]["login"] == login
     assert "Player" in list(response_json["resource"]["roles"])
+
+def test_failed_registration_with_kafka_consumer_observer(
+        account: AccountApi,
+        register_events_subscriber: RegisterEventsSubscriber,
+        register_events_error_subscriber: RegisterEventsErrorSubscriber,
+        kafka_producer: Producer,
+        register_message_wrong: dict[str, str],
+) -> None:
+    login = register_message_wrong['login']
+    email = register_message_wrong['email']
+    password = register_message_wrong['password']
+
+    account.register_user(login, email, password)
+
+    for i in range(10):
+        message_from_kafka = register_events_subscriber.get_message()
+        if message_from_kafka.value['login'] == login:
+            print("Сообщение в register-events нашлось")
+            break
+    else:
+        raise AssertionError("Email not found")
+
+    for i in range(10):
+        message_from_kafka = register_events_error_subscriber.get_message()
+        assert message_from_kafka.value['error_message']['title'] == 'Validation failed'
+        assert message_from_kafka.value['error_type'] == 'validation'
+        break
+    else:
+        raise AssertionError("Email not found")
+
+
+def test_failed_registration_with_kafka_wrong_type_error(
+        register_events_error_subscriber: RegisterEventsErrorSubscriber,
+        kafka_producer: Producer,
+        register_message_unknown,
+) -> None:
+    kafka_producer.send("register-events-errors", register_message_unknown)
+
+    for i in range(10):
+        message_from_kafka = register_events_error_subscriber.get_message()
+        assert message_from_kafka.value['error_type'] == 'unknown'
+        break
+    else:
+        raise AssertionError("Email not found")
+
+    for i in range(10):
+        message_from_kafka = register_events_error_subscriber.get_message()
+        assert message_from_kafka.value['error_type'] == 'validation'
+        break
+    else:
+        raise AssertionError("Email not found")
