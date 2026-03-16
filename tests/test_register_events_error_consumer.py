@@ -77,7 +77,7 @@ def test_failed_registration_with_kafka_consumer_observer(
         if message_from_kafka.value['input_data']['email'] == email:
             assert message_from_kafka.value['error_message']['title'] == 'Validation failed'
             assert message_from_kafka.value['error_type'] == 'validation'
-        break
+            break
     else:
         raise AssertionError("Email not found")
 
@@ -94,7 +94,7 @@ def test_failed_registration_with_kafka_wrong_type_error(
         message_from_kafka = register_events_error_subscriber.get_message()
         if message_from_kafka.value['input_data']['login'] == login:
             assert message_from_kafka.value['error_type'] == 'unknown'
-        break
+            break
     else:
         raise AssertionError("Email not found")
 
@@ -105,6 +105,6 @@ def test_failed_registration_with_kafka_wrong_type_error(
 
         if message_from_kafka.value['input_data']['login'] == login:
             assert message_from_kafka.value['error_type'] in ['validation']
-        break
+            break
     else:
         raise AssertionError("Email not found")
