@@ -8,6 +8,7 @@ from framework.helpers.kafka.consumers.register_events import RegisterEventsSubs
 
 from framework.internal.http.mail import MailApi
 from framework.internal.kafka.producer import Producer
+from framework.internal.rmq.publisher import RmqPublisher
 
 
 def test_success_registration_with_kafka_producer(
@@ -43,47 +44,13 @@ def test_success_registration_with_kafka_consumer_observer(
 
 def test_success_message_sent_with_rabbit(
         mail: MailApi,
-):
-    connection = pika.BlockingConnection(
-        pika.URLParameters('amqp://guest:guest@185.185.143.231:5672')
-    )
-    channel = connection.channel()
+        rmq_publisher: RmqPublisher,
+) -> None:
     login = uuid.uuid4().hex
     address = f"{login}@mail.ru"
     message = {
-        "address": address,
-        "subject": "test",
-        "body": "to qa or not to qa",
+        'address': address,
+        'subject': 'New subject',
+        'body': 'message'
     }
-
-    message = json.dumps(message).encode('utf-8')
-
-    try:
-        exchange = channel.exchange_declare(
-            exchange_type='topic',
-            exchange='dm.mail.sending',
-            durable=True
-        )
-
-        properties = pika.BasicProperties(
-            content_type='application/json',
-            correlation_id=str(uuid.uuid4()),
-        )
-
-        channel.basic_publish(
-            exchange='dm.mail.sending',
-            routing_key='',
-            body=message,
-            properties=properties,
-        )
-    finally:
-        channel.close()
-        connection.close()
-
-    for _ in range(10):
-        response = mail.find_message(query=login)
-        if response.json()['total'] > 0:
-            break
-        time.sleep(1)
-    else:
-        raise AssertionError('Email is not found')
+    rmq_publisher.publish("dm.mail.sending", message)
