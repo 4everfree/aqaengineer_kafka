@@ -22,11 +22,13 @@ class RmqPublisher(Singleton):
         self._channel = connection.channel()
 
     def _stop(self):
+        if self._channel is not None:
+            self._channel.close()
+
         if self._connection is not None:
             self._connection.close()
 
-        if self._channel is not None:
-            self._channel.close()
+
 
     def __enter__(self) -> "RmqPublisher":
         self._start()
