@@ -1,9 +1,14 @@
+import json
 import time
+import uuid
+
+import pika
 
 from framework.helpers.kafka.consumers.register_events import RegisterEventsSubscriber
 
 from framework.internal.http.mail import MailApi
 from framework.internal.kafka.producer import Producer
+from framework.internal.rmq.publisher import RmqPublisher
 
 
 def test_success_registration_with_kafka_producer(
@@ -36,3 +41,24 @@ def test_success_registration_with_kafka_consumer_observer(
             break
     else:
         raise AssertionError("Email not found")
+
+def test_success_message_sent_with_rabbit(
+        mail: MailApi,
+        rmq_publisher: RmqPublisher,
+) -> None:
+    login = uuid.uuid4().hex
+    address = f"{login}@mail.ru"
+    message = {
+        'address': address,
+        'subject': 'New subject',
+        'body': 'message'
+    }
+    rmq_publisher.publish("dm.mail.sending", message)
+
+    for _ in range(10):
+        response = mail.find_message(query=login)
+        if response.json()['total'] > 0:
+            break
+        time.sleep(1)
+    else:
+        raise AssertionError('Email is not found')
