@@ -5,6 +5,7 @@ import uuid
 
 from framework.helpers.kafka.consumers.register_events import RegisterEventsSubscriber
 from framework.helpers.kafka.consumers.register_events_error import RegisterEventsErrorSubscriber
+from framework.helpers.rmq.consumers.dm_mail_sending import DmMailSending
 from framework.internal.http.account import AccountApi
 from framework.internal.http.mail import MailApi
 from framework.internal.kafka.consumer import Consumer
@@ -88,3 +89,8 @@ def register_message_unknown() -> dict[str, dict[str, str]]:
 def rmq_publisher() -> Generator[RmqPublisher, Any, None]:
     with RmqPublisher() as publisher:
         yield publisher
+
+@pytest.fixture(scope="session", autouse=True)
+def rmq_dm_mail_sending_consumer() -> Generator[DmMailSending | Any, Any, None]:
+    with DmMailSending() as consumer:
+        yield consumer
