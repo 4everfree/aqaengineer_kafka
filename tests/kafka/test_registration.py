@@ -1,8 +1,5 @@
-import json
 import time
 import uuid
-
-import pika
 
 from framework.helpers.kafka.consumers.register_events import RegisterEventsSubscriber
 
